@@ -27,6 +27,8 @@ var ticTacToeModule = (function(){
   // Tic Tac Toe Constructor
   function TicTacToe() {
 	  this.currentPlayer = O_CONST;
+	  this.player1 = $('#name1').val();
+	  this.player2 = $('#name2').val();
 	  this.computerOpponent = $("#computer").is(':checked');
 	  this.board = ["","","","","","","","",""];
 	  this.selectionCount = 0;
@@ -133,8 +135,14 @@ var ticTacToeModule = (function(){
 	  var $winScreen = $('<div class="screen screen-win" id="finish"><header><h1>Tic Tac Toe</h1><p class="message">Winner</p><a href="#" class="button">New game</a></header></div>');
 	  if (winner === O_CONST) {
 		  $winScreen.addClass("screen-win-one");
+		  if (this.player1 !== "") {
+			  $winScreen.find(".message").text(this.player1 + " Wins!");
+		  }
 	  } else if ( winner === X_CONST) {
 		  $winScreen.addClass("screen-win-two");
+		  if (this.player2 !== "") {
+			  $winScreen.find(".message").text(this.player2 + " Wins!");
+		  }
 	  } else {
 		  $winScreen.addClass("screen-win-tie");
 		  $winScreen.find(".message").text("It's a Tie!");
