@@ -1,28 +1,9 @@
-// JavaScript Document
-// Tic Tac Toe Module
 var ticTacToeModule = (function(){
   "use strict";
-	
-  // Constnats (Just jusing var to maintain ES5 compatibility)
-  var X_CONST = "X";
-  var O_CONST = "O";
-	
-  // Public Functions
-  var exports =  {};
 
-  var winningCombinations = [
-	  [0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]
-  ];
-	
-  // Startup
-  exports.start = function () {
-	 
-    //Show Start Screen
-    showStartupScreen();	  
-	
-	$("#start").on("click", "a.button", startGameHandler);
-	
-  };
+  // *********************
+  // TIC TAC TOE CLASS
+  // *********************
 	
   // Tic Tac Toe Constructor
   function TicTacToe() {
@@ -38,6 +19,7 @@ var ticTacToeModule = (function(){
 	  this.switchPlayer();
   }
 	
+  // Tic Tac Toe: Switch Player - changes the active player
   TicTacToe.prototype.switchPlayer = function () {
 	  $(".players").removeClass("active");
 	  if (this.currentPlayer === X_CONST) {
@@ -49,47 +31,47 @@ var ticTacToeModule = (function(){
 	  }
 	  
 	  if (this.computerOpponent === true && this.currentPlayer === X_CONST) {
-		  var rand = (Math.floor(Math.random() * this.board.length));
-          while ($('.box[piece="' + rand + '"]').hasClass("clicked"))
-		  {
-		      rand = (Math.floor(Math.random() * this.board.length));
-		  }
-          
-
-		  var piece = rand;
-		  console.log("Identified piece#" + piece);
-		  setTimeout(function() {
-			  console.log("Triggering mouseenter for piece #" + piece);
-   		      $('.box[piece="' + piece + '"]').trigger('mouseenter');
-		  },100);
-		  setTimeout(function() {
-			   console.log("Triggering click for piece #" + piece);
-			  		  $('.box[piece="' + piece + '"]').trigger('click');
-			     $('.box:not(.clicked)').removeClass("box-filled-1").removeClass("box-filled-2");
-		  },500);
-
+ 	    this.processComputerTurn();
 	  }
   };
 	
+  // Computer will automatically select a game piece
+  TicTacToe.prototype.processComputerTurn = function () {
+		  var rand = (Math.floor(Math.random() * this.board.length));
+          while ($('.box[piece="' + rand + '"]').hasClass("clicked")){
+		      rand = (Math.floor(Math.random() * this.board.length));
+		  }
+		  var piece = rand;
+		  setTimeout(function() {
+   		      $('.box[piece="' + piece + '"]').trigger('mouseenter');
+		  },100);
+		  setTimeout(function() {
+			  	 $('.box[piece="' + piece + '"]').trigger('click');
+			     $('.box:not(.clicked)').removeClass("box-filled-1").removeClass("box-filled-2");
+		  },500);
+  };
+	
+  // *********************
+  // TIC TAC TOE EVENT HANDLERS
+  // *********************
+	
   // Add event listeners to controls
   TicTacToe.prototype.addEventListeners = function () {
-	  
-	  $(".boxes .box").on("mouseenter", { context: this}, this.enterBoxHandler);
-	  $(".boxes .box").on("mouseleave", { context: this}, this.leaveBoxHandler);
+	  $(".boxes .box").on("mouseenter", { context: this}, this.mouseEnterHandler);
+	  $(".boxes .box").on("mouseleave", { context: this}, this.mouseLeaveHandler);
 	  $(".boxes .box").on("click", { context: this}, this.clickBoxHandler);
   };
 	
   // Remove event listeners to controls
   TicTacToe.prototype.removeEventListeners = function () {
 	  
-	  $(".boxes .box").off("mouseenter", this.enterBoxHandler);
-	  $(".boxes .box").off("mouseleave", this.leaveBoxHandler);
+	  $(".boxes .box").off("mouseenter", this.mouseEnterHandler);
+	  $(".boxes .box").off("mouseleave", this.mouseLeaveHandler);
 	  $(".boxes .box").off("click",  this.clickBoxHandler);
   };
 	
-	
-  TicTacToe.prototype.enterBoxHandler = function (e) {
-	console.log("In Mouse Enter Handler Piece #" + $(this).attr('piece'));
+  // Show active player game piece if selection hasn't been chosen
+  TicTacToe.prototype.mouseEnterHandler = function (e) {
 	if ($(this).hasClass("box-filled-1") || 
 		$(this).hasClass("box-filled-2") ||
 	    $(this).hasClass("clicked")) {
@@ -103,78 +85,101 @@ var ticTacToeModule = (function(){
 	$(this).addClass(currentClass);
   };
 	
-  TicTacToe.prototype.leaveBoxHandler = function () {
+  // Remove the game piece if it hasn't been chosen
+  TicTacToe.prototype.mouseLeaveHandler = function () {
 	console.log("In Mouse Leave Handler Piece #" + $(this).attr('piece'));	  
 	if ($(this).hasClass("clicked")) {return;}
 	$(this).removeClass("box-filled-1").removeClass("box-filled-2");
   };
 	
+  // Select the game piece and check for winner
   TicTacToe.prototype.clickBoxHandler = function (e) {
-	console.log("In Click Handler");
-	if ($(this).hasClass("clicked")) {
-		return;}
+	if ($(this).hasClass("clicked")) {return;}
 	var _this = e.data.context;
 	_this.selectionCount++;
-    var currentPlayer = _this.currentPlayer;
-	  console.log("Adding clicked to piece #" + $(this).attr("piece"));
 	$(this).addClass("clicked"); 	
-    _this.board[$(this).attr("piece")] = currentPlayer;
-	if (_this.isWinner(currentPlayer)) { 
-	    _this.showWinner(currentPlayer); 
-	} else if (_this.selectionCount === 9) {
-		_this.showWinner("-");
-	} else {
-		_this.switchPlayer();
-	}
+    _this.board[$(this).attr("piece")] = _this.currentPlayer;
+	_this.checkWinner();
   };
 	
+  // *********************
+  // TIC TAC TOE GENERAL METHODS
+  // *********************
+	
+  // Check for winner 
+  TicTacToe.prototype.checkWinner = function(){
+	if (this.isWinner(this.currentPlayer)) { 
+	    this.showWinner(this.currentPlayer); 
+	} else if (this.selectionCount === 9) {
+		this.showWinner("-");
+	} else {
+		this.switchPlayer();
+	}
+
+  };
+	
+  // Show Winner
   TicTacToe.prototype.showWinner = function(winner) {
 	  $("#board").hide();
 	  this.removeEventListeners();
 	  $('#finish').remove();
-	  var $winScreen = $('<div class="screen screen-win" id="finish"><header><h1>Tic Tac Toe</h1><p class="message">Winner</p><a href="#" class="button">New game</a></header></div>');
+	  var $winScreen = $(WINNER_SCREEN_CONST);
+	  var msg = "";
 	  if (winner === O_CONST) {
 		  $winScreen.addClass("screen-win-one");
-		  if (this.player1 !== "") {
-			  $winScreen.find(".message").text(this.player1 + " Wins!");
-		  }
+		  msg = (this.player1 !== "" ? this.player1 : "O") + " Win's!";
 	  } else if ( winner === X_CONST) {
 		  $winScreen.addClass("screen-win-two");
-		  if (this.player2 !== "") {
-			  $winScreen.find(".message").text(this.player2 + " Wins!");
-		  }
+		  msg = (this.player2 !== "" ? this.player2 : "X") + " Win's!";
 	  } else {
 		  $winScreen.addClass("screen-win-tie");
-		  $winScreen.find(".message").text("It's a Tie!");
+		  msg = "It's a Tie!";
 	  }
+	  $winScreen.find(".message").text(msg);
 	  $winScreen.find("a").on("click",startGame);
       $("body").append($winScreen);
 
   };
 	
-  TicTacToe.prototype.isWinner = function(cp) {
+  // Checks if player is winner	
+  TicTacToe.prototype.isWinner = function(player) {
 	if ( this.selectionCount >= 5 ){ 
 		for (var i = 0; i < winningCombinations.length; i++) {
           var combination = winningCombinations[i];
-		  if (this.board[combination[0]] === cp && 
-			  this.board[combination[1]] === cp &&
-			  this.board[combination[2]] === cp){
+		  if (this.board[combination[0]] === player && 
+			  this.board[combination[1]] === player &&
+			  this.board[combination[2]] === player){
               return true; }
 		}
 	}  
     return false;
   };
 	
-  // Show the startup screen
-  function showStartupScreen() {
-	  // Hide the board
-	  $("#board").hide();
-	  var $startScreen = $('<div class="screen screen-start" id="start"><form name="players" id="players"><div><label for="name1">Player 1:</label><input type="text" id="name1" name="name1" ></div><div><label for="name2">Player 2:</label><input type="text" id="name2" name="name2" > <input type="checkbox" name="computer" id="computer" > <label for="computer"> Computer </label></div></form><header><h1>Tic Tac Toe</h1><a href="#" class="button">Start game</a></header></div>');
-	  $startScreen.find("#computer").on('change', computerCheckboxHandler);
-	  $("#board").before($startScreen);
-	  $("#name1").focus();
-  }
+// Constants (Just jusing var to maintain ES5 compatibility)
+  var X_CONST = "X";
+  var O_CONST = "O";
+  var WINNER_SCREEN_CONST = '<div class="screen screen-win" id="finish"><header><h1>Tic Tac Toe</h1><p class="message">Winner</p><a href="#" class="button">New game</a></header></div>';
+  var START_SCREEN_CONST = '<div class="screen screen-start" id="start"><form name="players" id="players"><div><label for="name1">Player 1:</label><input type="text" id="name1" name="name1" ></div><div><label for="name2">Player 2:</label><input type="text" id="name2" name="name2" > <input type="checkbox" name="computer" id="computer" > <label for="computer"> Computer </label></div></form><header><h1>Tic Tac Toe</h1><a href="#" class="button">Start game</a></header></div>';
 	
+  // Public Functions
+  var exports =  {};
+  // Define The Winning Combinations
+  var winningCombinations = [
+	  [0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]
+  ];
+	
+  // Startup
+  exports.start = function () {
+    //Show Start Screen
+    showStartupScreen();	  
+	$("#start").on("click", "a.button", startGameHandler);
+  };	
+	
+  // *********************
+  // GENERAL HANDLERS
+  // *********************
+	
+  // Computer Checkbox Handler
   var computerCheckboxHandler = function() {
 	if ($("#computer").is(':checked')) {
 		$('#name2').val('Computer').attr('disabled',true);
@@ -183,12 +188,12 @@ var ticTacToeModule = (function(){
 	}
   };
 	
+  // Start Game Handler
   var startGameHandler = function() {
 	  $('#player1').append('<p>' + $("#name1").val() + '</p>');
 	  $('#player2').append('<p>' + $("#name2").val() + '</p>');
 	  startGame();
   };
-	
 	
   // Start Game	
   function startGame() {
@@ -198,6 +203,16 @@ var ticTacToeModule = (function(){
 	  var game = new TicTacToe();
 	  game.addEventListeners();
 	  $("#board").show();
+  }
+	
+	  // Show the startup screen
+  function showStartupScreen() {
+	  // Hide the board
+	  $("#board").hide();
+	  var $startScreen = $(START_SCREEN_CONST);
+	  $startScreen.find("#computer").on('change', computerCheckboxHandler);
+	  $("#board").before($startScreen);
+	  $("#name1").focus();
   }
  
   return exports;
