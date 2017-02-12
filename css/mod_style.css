@@ -1,0 +1,29 @@
+/* CSS Document */
+
+form#players {
+    margin: 20px;
+    display: inline-block;
+    padding: 20px;
+    text-align: left;
+}
+
+form#players div {
+	margin: 5px;
+}
+
+form#players input[type="checkbox"] {
+    margin-left: 10px;
+	margin-right: 3px;
+} 
+
+form#players label {
+	min-width: 100px;
+	display: inline-block;
+	color: #FFF;
+    letter-spacing: 0.05em;
+}
+
+li.players p {
+	font-size: 1.5em; 
+    margin: 0;
+}

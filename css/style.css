@@ -37,9 +37,9 @@ h1 {
   height: 100%; }
   .screen header {
     position: relative;
-    top: 50%;
-    -webkit-transform: translatey(-50%);
-    transform: translatey(-50%); }
+    top: 40%;
+    -webkit-transform: translatey(-40%);
+    transform: translatey(-40%); }
   .screen h1 {
     color: #fff; }
   .screen-start {

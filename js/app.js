@@ -27,6 +27,7 @@ var ticTacToeModule = (function(){
   // Tic Tac Toe Constructor
   function TicTacToe() {
 	  this.currentPlayer = O_CONST;
+	  this.computerOpponent = $("#computer").is(':checked');
 	  this.board = ["","","","","","","","",""];
 	  this.selectionCount = 0;
 	  $(".box").each(function (idx){
@@ -43,6 +44,28 @@ var ticTacToeModule = (function(){
 	  } else {
 		  this.currentPlayer = X_CONST;
 		  $("#player2").addClass("active");
+	  }
+	  
+	  if (this.computerOpponent === true && this.currentPlayer === X_CONST) {
+		  var rand = (Math.floor(Math.random() * this.board.length));
+          while ($('.box[piece="' + rand + '"]').hasClass("clicked"))
+		  {
+		      rand = (Math.floor(Math.random() * this.board.length));
+		  }
+          
+
+		  var piece = rand;
+		  console.log("Identified piece#" + piece);
+		  setTimeout(function() {
+			  console.log("Triggering mouseenter for piece #" + piece);
+   		      $('.box[piece="' + piece + '"]').trigger('mouseenter');
+		  },100);
+		  setTimeout(function() {
+			   console.log("Triggering click for piece #" + piece);
+			  		  $('.box[piece="' + piece + '"]').trigger('click');
+			     $('.box:not(.clicked)').removeClass("box-filled-1").removeClass("box-filled-2");
+		  },500);
+
 	  }
   };
 	
@@ -63,12 +86,8 @@ var ticTacToeModule = (function(){
   };
 	
 	
-  // Event Handlers
-  function startGameHandler() {
-	  startGame();
-  }
-	
   TicTacToe.prototype.enterBoxHandler = function (e) {
+	console.log("In Mouse Enter Handler Piece #" + $(this).attr('piece'));
 	if ($(this).hasClass("box-filled-1") || 
 		$(this).hasClass("box-filled-2") ||
 	    $(this).hasClass("clicked")) {
@@ -82,30 +101,28 @@ var ticTacToeModule = (function(){
 	$(this).addClass(currentClass);
   };
 	
-  TicTacToe.prototype.leaveBoxHandler = function (e) {
-	if ($(this).hasClass("clicked")) {
-		return;}
-	var currentClass = "box-filled-1";
-	  if (e.data.context.currentPlayer === X_CONST) {
-        currentClass = "box-filled-2";		  
-	  }
-	$(this).removeClass(currentClass);
+  TicTacToe.prototype.leaveBoxHandler = function () {
+	console.log("In Mouse Leave Handler Piece #" + $(this).attr('piece'));	  
+	if ($(this).hasClass("clicked")) {return;}
+	$(this).removeClass("box-filled-1").removeClass("box-filled-2");
   };
 	
   TicTacToe.prototype.clickBoxHandler = function (e) {
+	console.log("In Click Handler");
 	if ($(this).hasClass("clicked")) {
 		return;}
 	var _this = e.data.context;
 	_this.selectionCount++;
     var currentPlayer = _this.currentPlayer;
+	  console.log("Adding clicked to piece #" + $(this).attr("piece"));
 	$(this).addClass("clicked"); 	
     _this.board[$(this).attr("piece")] = currentPlayer;
-	if (!_this.isWinner(currentPlayer)) { 
-	  _this.switchPlayer();
+	if (_this.isWinner(currentPlayer)) { 
+	    _this.showWinner(currentPlayer); 
 	} else if (_this.selectionCount === 9) {
 		_this.showWinner("-");
 	} else {
-       _this.showWinner(currentPlayer);
+		_this.switchPlayer();
 	}
   };
 	
@@ -144,9 +161,25 @@ var ticTacToeModule = (function(){
   function showStartupScreen() {
 	  // Hide the board
 	  $("#board").hide();
-	  var $startScreen = $('<div class="screen screen-start" id="start"><header><h1>Tic Tac Toe</h1><a href="#" class="button">Start game</a></header></div>');
+	  var $startScreen = $('<div class="screen screen-start" id="start"><form name="players" id="players"><div><label for="name1">Player 1:</label><input type="text" id="name1" name="name1" ></div><div><label for="name2">Player 2:</label><input type="text" id="name2" name="name2" > <input type="checkbox" name="computer" id="computer" > <label for="computer"> Computer </label></div></form><header><h1>Tic Tac Toe</h1><a href="#" class="button">Start game</a></header></div>');
+	  $startScreen.find("#computer").on('change', computerCheckboxHandler);
 	  $("#board").before($startScreen);
+	  $("#name1").focus();
   }
+	
+  var computerCheckboxHandler = function() {
+	if ($("#computer").is(':checked')) {
+		$('#name2').val('Computer').attr('disabled',true);
+	} else {
+		$('#name2').val('').attr('disabled',false);
+	}
+  };
+	
+  var startGameHandler = function() {
+	  $('#player1').append('<p>' + $("#name1").val() + '</p>');
+	  $('#player2').append('<p>' + $("#name2").val() + '</p>');
+	  startGame();
+  };
 	
 	
   // Start Game	
