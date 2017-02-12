@@ -9,7 +9,7 @@ var ticTacToeModule = (function(){
 	
   // Public Functions
   var exports =  {};
-  var board = ["","","","","","","","",""];
+
   var winningCombinations = [
 	  [0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]
   ];
@@ -27,6 +27,7 @@ var ticTacToeModule = (function(){
   // Tic Tac Toe Constructor
   function TicTacToe() {
 	  this.currentPlayer = O_CONST;
+	  this.board = ["","","","","","","","",""];
 	  this.selectionCount = 0;
 	  $(".box").each(function (idx){
 		  $(this).attr("piece", idx);
@@ -52,6 +53,15 @@ var ticTacToeModule = (function(){
 	  $(".boxes .box").on("mouseleave", { context: this}, this.leaveBoxHandler);
 	  $(".boxes .box").on("click", { context: this}, this.clickBoxHandler);
   };
+	
+  // Remove event listeners to controls
+  TicTacToe.prototype.removeEventListeners = function () {
+	  
+	  $(".boxes .box").off("mouseenter", this.enterBoxHandler);
+	  $(".boxes .box").off("mouseleave", this.leaveBoxHandler);
+	  $(".boxes .box").off("click",  this.clickBoxHandler);
+  };
+	
 	
   // Event Handlers
   function startGameHandler() {
@@ -89,7 +99,7 @@ var ticTacToeModule = (function(){
 	_this.selectionCount++;
     var currentPlayer = _this.currentPlayer;
 	$(this).addClass("clicked"); 	
-    board[$(this).attr("piece")] = currentPlayer;
+    _this.board[$(this).attr("piece")] = currentPlayer;
 	if (!_this.isWinner(currentPlayer)) { 
 	  _this.switchPlayer();
 	} else if (_this.selectionCount === 9) {
@@ -101,6 +111,8 @@ var ticTacToeModule = (function(){
 	
   TicTacToe.prototype.showWinner = function(winner) {
 	  $("#board").hide();
+	  this.removeEventListeners();
+	  $('#finish').remove();
 	  var $winScreen = $('<div class="screen screen-win" id="finish"><header><h1>Tic Tac Toe</h1><p class="message">Winner</p><a href="#" class="button">New game</a></header></div>');
 	  if (winner === O_CONST) {
 		  $winScreen.addClass("screen-win-one");
@@ -110,7 +122,7 @@ var ticTacToeModule = (function(){
 		  $winScreen.addClass("screen-win-tie");
 		  $winScreen.find(".message").text("It's a Tie!");
 	  }
-	  
+	  $winScreen.find("a").on("click",startGame);
       $("body").append($winScreen);
 
   };
@@ -119,9 +131,9 @@ var ticTacToeModule = (function(){
 	if ( this.selectionCount >= 5 ){ 
 		for (var i = 0; i < winningCombinations.length; i++) {
           var combination = winningCombinations[i];
-		  if (board[combination[0]] === cp && 
-			  board[combination[1]] === cp &&
-			  board[combination[2]] === cp){
+		  if (this.board[combination[0]] === cp && 
+			  this.board[combination[1]] === cp &&
+			  this.board[combination[2]] === cp){
               return true; }
 		}
 	}  
@@ -140,6 +152,8 @@ var ticTacToeModule = (function(){
   // Start Game	
   function startGame() {
 	  $("#start").hide();
+	  $("#finish").hide();
+	  $("li.box").removeClass("box-filled-1").removeClass("box-filled-2").removeClass("clicked");
 	  var game = new TicTacToe();
 	  game.addEventListeners();
 	  $("#board").show();
